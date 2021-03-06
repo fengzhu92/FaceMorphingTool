@@ -1,0 +1,44 @@
+#! /bin/bash
+
+panic()
+{
+	echo "ERROR: $@"
+	exit 1
+}
+
+usage()
+{
+	echo "bad usage: $@"
+	cat <<- EOF
+	usage: $0 [options]
+	Options:
+	-i in_files   Specify basename for input files.
+	-o out_file   Specify output file. (Should be mp4?)
+	EOF
+	exit 2
+}
+
+out_file=
+in_file=
+
+while getopts i:o: option; do
+	case "$option" in
+	i)
+		in_file="$OPTARG";;
+	o)
+		out_file="$OPTARG";;
+	*)
+		usage;;
+	esac
+done
+
+if [ -z "$in_file" ]; then
+	usage "no input files specified"
+fi
+
+if [ -z "$out_file" ]; then
+	usage "no output file specified"
+fi
+
+ffmpeg -y -f image2 -r 25 -i "$in_file" -b 600k "$out_file" 2> /dev/null
+

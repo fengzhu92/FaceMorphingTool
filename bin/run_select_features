@@ -1,0 +1,42 @@
+#! /bin/bash
+
+cmd_dir=`dirname $0` || exit 1
+
+panic() {
+	echo "ERROR: $@"
+	exit 1
+}
+
+# The directory containing the images for morphing.
+image_dir="$cmd_dir/../data/images"
+
+# The directory containing the feature sets for morphing.
+feature_dir="$cmd_dir/../data/features"
+
+# The morph command.
+select_features="$cmd_dir/../src/select_features"
+
+out_dir=$cmd_dir/output/select_features
+
+if [ ! -d "$out_dir" ]; then
+	mkdir -p "$out_dir" || panic "cannot make directory"
+fi
+
+rm -f "$out_dir"/*.dat "$out_dir"/*.ppm
+
+for file in Feng.dat Dan.dat; do
+	cp "$feature_dir/$file" "$out_dir" || panic "cannot copy file $file"
+done
+
+for file in Feng.ppm Dan.ppm; do
+	cp "$image_dir/$file" "$out_dir" || panic "cannot copy file $file"
+done
+
+opts=()
+opts+=(-i "$out_dir/Feng.ppm")
+opts+=(-f "$out_dir/Feng.dat")
+opts+=(-i "$out_dir/Dan.ppm")
+opts+=(-f "$out_dir/Dan.dat")
+echo "Running $select_features ${opts[@]}"
+"$select_features" "${opts[@]}"
+

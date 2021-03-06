@@ -1,0 +1,150 @@
+%% README
+%% for image morphing software
+
+Name:	  Image Morphing Software
+Author:   Feng Zhu(fengzhu@uvic.ca)
+Date:	  February 23, 2015
+Place:    University of Victoria
+
+(1) INTRODUCTION
+-----------------
+The image morphing software is developed using C++. The software consists of three programs: the "select_features" program, the "morph_images" program, and the "frames_to_video" program. The "select_features" program is a Graphical User Interface, where the user can manually specify feature line segments for input images. The "morph_images" program uses the feature data files obtained from the GUI and produces intermediate frames. The "frames_to_video" program can be used to convert the frames to a video displaying the morphing result. For details see the manual part.
+
+Image Morphing Software will run on GNU/Linux platform. Several libraries need to be installed including GLUT, SPL, CGAL, and OpenGL. 
+
+
+(2) HISTORY
+------------
+The feature-based image-morphing algorithm was proposed by Beier and Neely. The algorithm is created while making a Michael Jackson's musical video "Black or White".
+
+
+(3) REQUIRED SYSTEM
+--------------------
+LINUX
+
+
+(4) FILES INCLUDED
+--------------------
+
+Makefile          	% compile and link document
+image.hpp         	% header file for image read/write
+image.cpp        	% implementation of functions
+feature.hpp      	% header file for feature read/write
+feature.cpp	 	% implementation of feature related functions
+morph.hpp	 	% header file for morphing 
+morph.cpp   	     	% implementation of morphing functions
+select_features.cpp	% GUI program
+morph_images.cpp	% image morphing program
+
+(5) DATA
+-----------
+a. image files (ppm)
+The software support PPM format image files.
+
+b. feature data files 
+The feature line segments are selected and then stored in data files. Each data file contains a list of line segments selected through the GUI program. Each line represents a feature, which is directed line segment with a startpoint and an endpoint.
+
+c. intermediate frames (ppm)
+The morphing program generates a user defined number of intermediate frames and store them to the current directory or a user defined directory. These frames are also PPM format. 
+
+
+(6) MANUAL
+-----------
+The entire program includes several programs. For each program, one way of compiling and running it is to type with the syntax and options at the command line (options are shown in square brackets).
+
+a. select_features program
+When using the GUI, line segments are selected by mouse clicking, dragging, and releasing. There are also 'Clear', 'Undo', and 'Save' buttons provided for clearing all segments, deleting the last line segment, and saving selected lines to a corresponding data file. After this process, press the key 'Esc' to exit.
+
+Synopsis:
+	select_features [-i source] [-f sourceFeature] [-i target] [-f targetFeature] 
+Options:
+	-i specify the source or target image (must be specified twice)
+	-f specify the source or target feature line segment data file (must be specified twice)
+
+
+b. morph_images program
+This program uses the feature data files from the GUI and produces a sequence of morphed images.
+Synopsis:
+	morph_images [-i sourceImage] [-f featureSet1] [-i targetImage] [-f featureSet2] [-n 50] [-b basename] [-d 3] [-g] [-s] [-a] [-m] [-p]
+ 
+Options:
+        -i specifies the source image or target image (must be specified twice)
+	-f specifies the feature line segments of image (must be specified twice)
+	-n specifies the number of frames to be generated.
+	-d specifies the digits for the file name of each frame. This is optional. The default value is calculated automatically based on the [-n] option
+	-a specifies a parameter for warping. This is optional. The default value is 1.0
+	-m specifies a parameter for warping. This is optional. The default value is 1.0
+	-p specifies a parameter for warping. This is optional. The default value is 0.5
+        -s sets the flag indicating if the frames should be saved. The option can be 0 or 1. This is optional. Default is 1 that enables the saving of frames.
+        -g sets the flag indicating if the frames should be displayed. The option can be 0 or 1. This is optional. Default is 1 that enables the displaying of the frames.
+	-t sets the timing flag indicating if the time consumption should be printed. The option can be specified as 0 or 1. This is optional and by default 1 that enables printing timing information.
+
+
+c. frames_to_video program
+This program is used to convert the morphed images to a video animating the morphing result.
+Synopsis:
+	frames_to_video [-i basename] [-o out_file]
+Options:
+	-i sets the base name for input files. This option is required.
+	-f sets the output file name. This is required.
+
+
+(7) SOFTWARE USAGE EXAMPLES
+Before using the program, the user should first build the software by using Makefile attached in the software package. Note that the user might also need to modify the Makefile (e.g., set the variables at the start of the Makefile based on the user's system). Then delete all the object files and executable files generated from previous building process by running the command:
+	make clean
+Then, generate all the executable programs by running the command:
+	make 
+
+
+Example 1A: Suppose that we have a source image source.ppm and a target image target.ppm. We want to select a few feature line segments for both of the image, and then save the feature line segment files to featureDate1.dat and featureData2.dat separately. This task can be accomplished by running the command as follows:
+/************ command line demo ***********/
+select_features -i source.ppm -f featureData1.dat -i target.ppm -f featureData2.dat
+
+Example 1B: After finishing Example 1A, we want to generate 50 frames between these two images based on featureData1.dat and featureData2.dat, and each frame has a basename 'frame'. The three parameters for morphing are 1.0, 1.5 and 0.8. Then save the frames to a file folder under the current directory and watch the animation after morphing completed. The task can be accomplished by running the morph_images command below:
+/ ********** command line demo ***********/
+morph_images -i source.ppm -f featureData1.dat -i target.ppm -f featureData2.dat -n 50 -b frame -s -g -a 1.0 -m 1.5 -p 0.8
+
+Example 1C: After all frames are saved, we want to create a mp4 video named output. The task can be accomplished by the command below:
+/ ********** command line demo ***********/
+frames_to_video -i frame -o output.mp4
+
+Example 2A: Suppose that we have a source image source.ppm and a target image target.ppm. We already have a feature data file named featureSet1 for source image. We want to select a few feature line segments just from the target image, and then save the segment set to a file named featureSet2. This task can be accomplished by running the command as follows:
+/************ command line demo ***********/
+select_features -i source.ppm -f featureSet1 -i target.ppm -f featureSet2
+
+Example 2B: After finishing Example 2A, we want to generate 100 frames between these two images based on featureSet1 and featureSet2, and each frame has a basename 'figure'. The frames are to be stored in a existed file folder 'output' under current directory. The three parameters for morphing are default values. Print out the run time of morphing process. The task can be accomplished by running the morph_images command below:
+/ ********** command line demo ***********/
+morph_images -i source.ppm -f featureSet1 -i target.ppm -f featureSet2 -n 100 -b output/figure -s -t 
+
+Example 2C: After all frames are generated, we want to create a mp4 video named 'animation' with frame rate 25 frames/sec. The task can be accomplished by the command below:
+/ ********** command line demo ***********/
+frames_to_video -i output/figure -o animation.mp4
+
+
+
+Example 3A: Suppose that we have image1.ppm, image2.ppm, ... , image5.ppm in the folder group_photos under command directory. Their feature data files are also provided as feature1.dat, feature2.dat, ..., feature5.dat. Each morphing between every two successive images contain 100 frames with names like frame_0006.ppm in a folder named output under current directory. The parameters are default values. This task can be accomplished by running the following command:
+/ ********** command line demo ***********/
+morph_images -i image1.ppm -f feature1.dat -i image2.ppm -f feature2.dat -i image3.ppm -f feature3.dat -i image4.ppm -f feature4.dat -i image5.ppm -f feature5.dat -n 100 -b output/frame -d 4 -s -t 
+
+Example 3B: To generate a video named result, run the following command:
+/ ********** command line demo ***********/
+frames_to_video -i output/figure -o result.mp4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

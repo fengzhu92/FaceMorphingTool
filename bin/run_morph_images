@@ -1,0 +1,101 @@
+#! /bin/bash
+
+cmd_dir=`dirname $0` || exit 1
+
+panic() {
+	echo "ERROR: $@"
+	exit 1
+}
+
+# The directory containing the images for morphing.
+image_dir="$cmd_dir/../data/images"
+
+# The directory containing the feature sets for morphing.
+feature_dir="$cmd_dir/../data/features"
+
+# The morph command.
+morph="$cmd_dir/../src/morph_images"
+
+make_video="$cmd_dir/frames_to_video"
+
+#frame_rate=30
+frame_rate=60
+
+demos=()
+demos+=(1)
+demos+=(2)
+
+for demo in "${demos[@]}"; do
+
+	out_dir="$cmd_dir/output/$demo"
+
+	if [ ! -d "$out_dir" ]; then
+		mkdir -p $out_dir || panic "cannot make directory $out_dir"
+	fi
+	rm -f "$out_dir"/frame*.ppm
+
+	base_opts=()
+	base_opts+=(-b $out_dir/frame_)
+	base_opts+=(-d 6)
+	base_opts+=(-n $frame_rate)
+
+	case "$demo" in
+	1)
+		opts=()
+		#opts+=(-g)
+		opts+=(-s)
+		names=()
+		names+=(Ali)
+		names+=(Dan)
+		names+=(Anthony)
+		names+=(Feng)
+		names+=(Badr)
+		names+=(Frank)
+		names+=(Joyce)
+		names+=(Jay)
+		names+=(Feng)
+		names+=(Michael)
+		names+=(hippo)
+		names+=(Paul)
+		#alt_name=hippo
+		alt_name=dog
+		for i in "${names[@]}"; do
+			opts+=(-i $image_dir/$i.ppm)
+			opts+=(-f $feature_dir/$i.dat)
+			opts+=(-i $image_dir/$alt_name.ppm)
+			opts+=(-f $feature_dir/$alt_name.dat)
+			opts+=(-i $image_dir/$i.ppm)
+			opts+=(-f $feature_dir/$i.dat)
+		done
+		;;
+	2)
+		opts=()
+		#opts+=(-g)
+		opts+=(-s)
+		names=()
+		names+=(Ali)
+		names+=(Dan)
+		names+=(Anthony)
+		names+=(Feng)
+		names+=(Badr)
+		names+=(Frank)
+		names+=(Joyce)
+		names+=(Jay)
+		names+=(Feng)
+		names+=(Michael)
+		names+=(Paul)
+		for i in "${names[@]}"; do
+			opts+=(-i $image_dir/$i.ppm)
+			opts+=(-f $feature_dir/$i.dat)
+		done
+		;;
+	esac
+
+	echo "Running $morph ${base_opts[@]} ${opts[@]}"
+	"$morph" "${base_opts[@]}" "${opts[@]}" || panic "image morph failed"
+
+	"$make_video" -o demo_${demo}.mp4 -i "$out_dir/frame_%06d.ppm" || \
+	  panic "cannot make video from frames"
+
+done
+
