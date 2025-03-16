@@ -1,0 +1,1 @@
+This is an application written in C++, with a GUI software provided for the user to select face features from source and target face images. The application then based on feature files to calculate intermediate frames to be interpolated. At the end, FFmpeg command is provided to generate a video displaying the animations of morphing from the source to destination.
